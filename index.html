@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manifestation Journal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            overflow: hidden;
+        }
+
+        .container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .tab-bar {
+            background: #1f2937;
+            color: white;
+            display: flex;
+            align-items: center;
+            padding: 8px 16px;
+            border-bottom: 1px solid #374151;
+        }
+
+        .tabs-container {
+            display: flex;
+            gap: 4px;
+        }
+
+        .tab {
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+            background: #374151;
+            color: #d1d5db;
+        }
+
+        .tab:hover {
+            background: #4b5563;
+        }
+
+        .tab.active {
+            background: #2563eb;
+            color: white;
+        }
+
+        .edit-input {
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 14px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            outline: none;
+            width: 128px;
+        }
+
+        .edit-btn {
+            margin-left: 4px;
+            color: #9ca3af;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .edit-btn:hover {
+            color: white;
+        }
+
+        .new-btn {
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 14px;
+            background: #059669;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-left: 8px;
+        }
+
+        .new-btn:hover {
+            background: #047857;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+        }
+
+        .sidebar {
+            width: 256px;
+            background: #111827;
+            color: white;
+            padding: 16px;
+            overflow-y: auto;
+            border-right: 1px solid #374151;
+        }
+
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .sidebar h3 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .close-btn {
+            color: #9ca3af;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .close-btn:hover {
+            color: white;
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .names-section {
+            color: #93c5fd;
+            margin-bottom: 24px;
+        }
+
+        .words-section {
+            color: #86efac;
+        }
+
+        .word-item {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .word-count {
+            color: #9ca3af;
+        }
+
+        .no-data {
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .show-tracker-btn {
+            position: fixed;
+            top: 16px;
+            left: 16px;
+            z-index: 10;
+            background: #1f2937;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .environment {
+            flex: 1;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .ocean {
+            background: linear-gradient(to bottom, #1a1a2e 0%, #16213e 30%, #0f3460 70%, #0e2954 100%);
+        }
+
+        .surface {
+            background: linear-gradient(to bottom, #4da6ff 0%, #3d8bff 50%, #2d6fff 100%);
+        }
+
+        .sky {
+            background: linear-gradient(to bottom, #000428 0%, #004e92 100%);
+        }
+
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .ocean-particle {
+            width: 4px;
+            height: 4px;
+            background: #93c5fd;
+            opacity: 0.3;
+            animation: pulse 3s infinite;
+        }
+
+        .surface-particle {
+            width: 8px;
+            height: 8px;
+            background: white;
+            opacity: 0.2;
+            animation: bounce 1.5s infinite;
+        }
+
+        .sky-particle {
+            width: 4px;
+            height: 4px;
+            background: white;
+            opacity: 0.6;
+            animation: pulse 4s infinite;
+        }
+
+        .element {
+            position: absolute;
+            transform: translate(-50%, -50%);
+        }
+
+        .element-content {
+            position: relative;
+        }
+
+        .element-content.group:hover .element-buttons {
+            opacity: 1;
+        }
+
+        .element-main {
+            font-size: 24px;
+            cursor: move;
+            user-select: none;
+        }
+
+        .element-main.pulsing {
+            animation: pulse 2s infinite;
+        }
+
+        .bubble {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid;
+            border-opacity: 0.8;
+            cursor: move;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+        }
+
+        .bubble-inner {
+            width: 8px;
+            height: 8px;
+            background: white;
+            opacity: 0.4;
+            border-radius: 50%;
+        }
+
+        .element-buttons {
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .element-btn {
+            position: absolute;
+            top: -8px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: none;
+            color: white;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .color-btn {
+            left: -8px;
+            background: #3b82f6;
+        }
+
+        .delete-btn {
+            right: -8px;
+            background: #ef4444;
+        }
+
+        .label-input {
+            position: absolute;
+            top: 32px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 14px;
+            width: 320px;
+            text-align: center;
+            border: none;
+            outline: none;
+            z-index: 200;
+        }
+
+        .fish-input {
+            background: #1e3a8a;
+            color: #dbeafe;
+        }
+
+        .bubble-input {
+            background: #1d4ed8;
+            color: white;
+        }
+
+        .star-input {
+            background: #312e81;
+            color: #fef3c7;
+        }
+
+        .label-display {
+            position: absolute;
+            top: 32px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            width: 160px;
+            text-align: center;
+            word-break: break-words;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .element-content.group:hover .label-display {
+            opacity: 1;
+        }
+
+        .fish-label {
+            background: rgba(30, 58, 138, 0.8);
+            color: #dbeafe;
+        }
+
+        .bubble-label {
+            background: rgba(29, 78, 216, 0.8);
+            color: white;
+        }
+
+        .star-label {
+            background: rgba(49, 46, 129, 0.8);
+            color: #fef3c7;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.8; }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .capitalize {
+            text-transform: capitalize;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Tab Bar -->
+        <div class="tab-bar">
+            <div class="tabs-container" id="tabsContainer">
+                <!-- Tabs will be generated by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Main Interface -->
+        <div class="main-content">
+            <!-- Keyword Tracker Sidebar -->
+            <div class="sidebar" id="sidebar">
+                <div class="sidebar-header">
+                    <h3>Word Tracker</h3>
+                    <button class="close-btn" onclick="toggleSidebar()">×</button>
+                </div>
+                
+                <div id="namesSection" class="names-section" style="display: none;">
+                    <div class="section-title">People Mentioned</div>
+                    <div id="namesList"></div>
+                </div>
+                
+                <div id="wordsSection" class="words-section" style="display: none;">
+                    <div class="section-title">Common Words</div>
+                    <div id="wordsList"></div>
+                </div>
+                
+                <div id="noData" class="no-data">
+                    Start adding labels to see word patterns...
+                </div>
+            </div>
+
+            <!-- Show Tracker Button (hidden by default) -->
+            <button class="show-tracker-btn" id="showTrackerBtn" onclick="toggleSidebar()" style="display: none;">
+                Show Tracker
+            </button>
+
+            <!-- Main Content Area -->
+            <div style="flex: 1; display: flex;">
+                <!-- Deep Ocean Section -->
+                <div class="environment ocean" id="oceanSection" ondblclick="addFish(event)">
+                    <!-- Particles will be generated by JavaScript -->
+                </div>
+
+                <!-- Surface Waters Section -->
+                <div class="environment surface" id="surfaceSection" ondblclick="addBubble(event)">
+                    <!-- Particles will be generated by JavaScript -->
+                </div>
+
+                <!-- Starry Sky Section -->
+                <div class="environment sky" id="skySection" ondblclick="addStar(event)">
+                    <!-- Particles will be generated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State management
+        let pages = {
+            'page1': {
+                name: 'Situation 1',
+                fish: [],
+                bubbles: [],
+                stars: []
+            }
+        };
+        let currentPageId = 'page1';
+        let editingItem = null;
+        let editingTab = null;
+        let dragging = null;
+        let dragOffset = { x: 0, y: 0 };
+        let showTracker = true;
+        let nextId = 1;
+
+        // Color arrays
+        const fishColors = ['🐟', '🐠', '🐡', '🦈', '🐙', '🦑', '🐋'];
+        const bubbleColors = [
+            { bg: 'rgba(255, 255, 255, 0.6)', border: 'white' },
+            { bg: 'rgba(147, 197, 253, 0.6)', border: '#93c5fd' },
+            { bg: 'rgba(134, 239, 172, 0.6)', border: '#86efac' },
+            { bg: 'rgba(254, 240, 138, 0.6)', border: '#fef08a' },
+            { bg: 'rgba(196, 181, 253, 0.6)', border: '#c4b5fd' },
+            { bg: 'rgba(251, 182, 206, 0.6)', border: '#fbb6ce' },
+            { bg: 'rgba(252, 165, 165, 0.6)', border: '#fca5a5' }
+        ];
+        const starColors = ['⭐', '🌟', '✨', '💫', '🌠', '⚡', '🔥'];
+
+        // Stop words and names
+        const stopWords = new Set(['the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'from', 'up', 'about', 'into', 'through', 'during', 'before', 'after', 'above', 'below', 'between', 'among', 'a', 'an', 'as', 'are', 'was', 'were', 'been', 'be', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might', 'must', 'can', 'is', 'it', 'this', 'that', 'these', 'those', 'i', 'you', 'he', 'she', 'we', 'they', 'me', 'him', 'her', 'us', 'them', 'my', 'your', 'his', 'her', 'our', 'their']);
+        
+        const commonNames = new Set(['sarah', 'john', 'mike', 'mary', 'david', 'lisa', 'chris', 'anna', 'james', 'emma', 'robert', 'jennifer', 'michael', 'jessica', 'william', 'ashley', 'richard', 'amanda', 'thomas', 'melissa', 'mom', 'dad', 'mother', 'father', 'mum', 'papa', 'mama', 'rosella', 'alex', 'sam', 'kate', 'ben', 'amy', 'tom', 'jane', 'mark', 'susan', 'paul', 'karen', 'steve', 'nancy', 'kevin', 'betty', 'jason', 'helen', 'jeff', 'donna', 'ryan', 'carol', 'jacob', 'ruth', 'gary', 'sharon', 'nick', 'michelle', 'eric', 'laura', 'stephen', 'sarah', 'andrew', 'kimberly', 'josh', 'deborah', 'kenneth', 'dorothy', 'brian', 'lisa', 'george', 'nancy']);
+
+        // Initialize
+        function init() {
+            createParticles();
+            updateTabs();
+            updateWordTracker();
+            setupEventListeners();
+        }
+
+        function createParticles() {
+            // Ocean particles
+            const oceanSection = document.getElementById('oceanSection');
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle ocean-particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 3 + 's';
+                particle.style.animationDuration = (2 + Math.random() * 2) + 's';
+                oceanSection.appendChild(particle);
+            }
+
+            // Surface particles
+            const surfaceSection = document.getElementById('surfaceSection');
+            for (let i = 0; i < 15; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle surface-particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 2 + 's';
+                particle.style.animationDuration = (1 + Math.random()) + 's';
+                surfaceSection.appendChild(particle);
+            }
+
+            // Sky particles
+            const skySection = document.getElementById('skySection');
+            for (let i = 0; i < 30; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle sky-particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 4 + 's';
+                particle.style.animationDuration = (2 + Math.random() * 3) + 's';
+                skySection.appendChild(particle);
+            }
+        }
+
+        function setupEventListeners() {
+            document.addEventListener('mousemove', handleMouseMove);
+            document.addEventListener('mouseup', handleMouseUp);
+        }
+
+        function updateTabs() {
+            const container = document.getElementById('tabsContainer');
+            container.innerHTML = '';
+
+            Object.entries(pages).forEach(([pageId, page]) => {
+                const tabDiv = document.createElement('div');
+                tabDiv.style.display = 'flex';
+                tabDiv.style.alignItems = 'center';
+
+                if (editingTab === pageId) {
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.value = page.name;
+                    input.className = 'edit-input';
+                    input.addEventListener('blur', () => renamePage(pageId, input.value));
+                    input.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter') renamePage(pageId, input.value);
+                    });
+                    tabDiv.appendChild(input);
+                    setTimeout(() => input.focus(), 0);
+                } else {
+                    const button = document.createElement('button');
+                    button.textContent = page.name;
+                    button.className = `tab ${currentPageId === pageId ? 'active' : ''}`;
+                    button.onclick = () => setCurrentPage(pageId);
+                    tabDiv.appendChild(button);
+
+                    const editBtn = document.createElement('button');
+                    editBtn.innerHTML = '✏️';
+                    editBtn.className = 'edit-btn';
+                    editBtn.onclick = () => startEditingTab(pageId);
+                    tabDiv.appendChild(editBtn);
+                }
+
+                container.appendChild(tabDiv);
+            });
+
+            const newBtn = document.createElement('button');
+            newBtn.textContent = '+ New';
+            newBtn.className = 'new-btn';
+            newBtn.onclick = addNewPage;
+            container.appendChild(newBtn);
+        }
+
+        function addNewPage() {
+            const newPageId = `page${Object.keys(pages).length + 1}`;
+            pages[newPageId] = {
+                name: `Situation ${Object.keys(pages).length + 1}`,
+                fish: [],
+                bubbles: [],
+                stars: []
+            };
+            setCurrentPage(newPageId);
+        }
+
+        function setCurrentPage(pageId) {
+            currentPageId = pageId;
+            editingItem = null;
+            updateTabs();
+            renderElements();
+            updateSectionZIndex();
+        }
+
+        function startEditingTab(pageId) {
+            editingTab = pageId;
+            updateTabs();
+        }
+
+        function renamePage(pageId, newName) {
+            if (newName.trim()) {
+                pages[pageId].name = newName.trim();
+            }
+            editingTab = null;
+            updateTabs();
+        }
+
+        function addFish(event) {
+            const rect = event.currentTarget.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+            
+            const newFish = {
+                id: nextId++,
+                x: x,
+                y: y,
+                label: 'New impulse',
+                color: 0
+            };
+            
+            pages[currentPageId].fish.push(newFish);
+            editingItem = newFish.id;
+            renderElements();
+            updateSectionZIndex();
+            updateWordTracker();
+        }
+
+        function addBubble(event) {
+            const rect = event.currentTarget.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+            
+            const newBubble = {
+                id: nextId++,
+                x: x,
+                y: y,
+                label: 'New awareness',
+                color: 0
+            };
+            
+            pages[currentPageId].bubbles.push(newBubble);
+            editingItem = newBubble.id;
+            renderElements();
+            updateSectionZIndex();
+            updateWordTracker();
+        }
+
+        function addStar(event) {
+            const rect = event.currentTarget.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+            
+            const newStar = {
+                id: nextId++,
+                x: x,
+                y: y,
+                label: 'New ideal',
+                color: 0
+            };
+            
+            pages[currentPageId].stars.push(newStar);
+            editingItem = newStar.id;
+            renderElements();
+            updateSectionZIndex();
+            updateWordTracker();
+        }
+
+        function renderElements() {
+            renderFish();
+            renderBubbles();
+            renderStars();
+        }
+
+        function renderFish() {
+            const container = document.getElementById('oceanSection');
+            // Remove existing fish
+            container.querySelectorAll('.element').forEach(el => el.remove());
+            
+            pages[currentPageId].fish.forEach(fish => {
+                const element = createFishElement(fish);
+                container.appendChild(element);
+            });
+        }
+
+        function renderBubbles() {
+            const container = document.getElementById('surfaceSection');
+            // Remove existing bubbles
+            container.querySelectorAll('.element').forEach(el => el.remove());
+            
+            pages[currentPageId].bubbles.forEach(bubble => {
+                const element = createBubbleElement(bubble);
+                container.appendChild(element);
+            });
+        }
+
+        function renderStars() {
+            const container = document.getElementById('skySection');
+            // Remove existing stars
+            container.querySelectorAll('.element').forEach(el => el.remove());
+            
+            pages[currentPageId].stars.forEach(star => {
+                const element = createStarElement(star);
+                container.appendChild(element);
+            });
+        }
+
+        function createFishElement(fish) {
+            const element = document.createElement('div');
+            element.className = 'element';
+            element.style.left = fish.x + 'px';
+            element.style.top = fish.y + 'px';
+            
+            const content = document.createElement('div');
+            content.className = 'element-content group';
+            
+            const main = document.createElement('div');
+            main.className = 'element-main';
+            main.textContent = fishColors[fish.color];
+            main.onmousedown = (e) => handleMouseDown(e, 'fish', fish.id);
+            main.onclick = (e) => { e.stopPropagation(); startEditing(fish.id); };
+            
+            const buttons = document.createElement('div');
+            buttons.className = 'element-buttons';
+            
+            const colorBtn = document.createElement('button');
+            colorBtn.className = 'element-btn color-btn';
+            colorBtn.innerHTML = '🎨';
+            colorBtn.onclick = (e) => { e.stopPropagation(); changeColor('fish', fish.id); };
+            
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'element-btn delete-btn';
+            deleteBtn.innerHTML = '×';
+            deleteBtn.onclick = (e) => { e.stopPropagation(); deleteItem('fish', fish.id); };
+            
+            buttons.appendChild(colorBtn);
+            buttons.appendChild(deleteBtn);
+            
+            content.appendChild(main);
+            content.appendChild(buttons);
+            
+            if (editingItem === fish.id) {
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.value = fish.label;
+                input.className = 'label-input fish-input';
+                input.onblur = (e) => updateLabel('fish', fish.id, e.target.value);
+                input.onkeypress = (e) => {
+                    if (e.key === 'Enter') updateLabel('fish', fish.id, e.target.value);
+                };
+                content.appendChild(input);
+                setTimeout(() => input.focus(), 0);
+            } else {
+                const label = document.createElement('div');
+                label.className = 'label-display fish-label';
+                label.textContent = fish.label;
+                content.appendChild(label);
+            }
+            
+            element.appendChild(content);
+            return element;
+        }
+
+        function createBubbleElement(bubble) {
+            const element = document.createElement('div');
+            element.className = 'element';
+            element.style.left = bubble.x + 'px';
+            element.style.top = bubble.y + 'px';
+            
+            const content = document.createElement('div');
+            content.className = 'element-content group';
+            
+            const main = document.createElement('div');
+            main.className = 'bubble';
+            main.style.backgroundColor = bubbleColors[bubble.color].bg;
+            main.style.borderColor = bubbleColors[bubble.color].border;
+            main.onmousedown = (e) => handleMouseDown(e, 'bubble', bubble.id);
+            main.onclick = (e) => { e.stopPropagation(); startEditing(bubble.id); };
+            
+            const inner = document.createElement('div');
+            inner.className = 'bubble-inner';
+            main.appendChild(inner);
+            
+            const buttons = document.createElement('div');
+            buttons.className = 'element-buttons';
+            
+            const colorBtn = document.createElement('button');
+            colorBtn.className = 'element-btn color-btn';
+            colorBtn.innerHTML = '🎨';
+            colorBtn.onclick = (e) => { e.stopPropagation(); changeColor('bubble', bubble.id); };
+            
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'element-btn delete-btn';
+            deleteBtn.innerHTML = '×';
+            deleteBtn.onclick = (e) => { e.stopPropagation(); deleteItem('bubble', bubble.id); };
+            
+            buttons.appendChild(colorBtn);
+            buttons.appendChild(deleteBtn);
+            
+            content.appendChild(main);
+            content.appendChild(buttons);
+            
+            if (editingItem === bubble.id) {
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.value = bubble.label;
+                input.className = 'label-input bubble-input';
+                input.onblur = (e) => updateLabel('bubble', bubble.id, e.target.value);
+                input.onkeypress = (e) => {
+                    if (e.key === 'Enter') updateLabel('bubble', bubble.id, e.target.value);
+                };
+                content.appendChild(input);
+                setTimeout(() => input.focus(), 0);
+            } else {
+                const label = document.createElement('div');
+                label.className = 'label-display bubble-label';
+                label.textContent = bubble.label;
+                content.appendChild(label);
+            }
+            
+            element.appendChild(content);
+            return element;
+        }
+
+        function createStarElement(star) {
+            const element = document.createElement('div');
+            element.className = 'element';
+            element.style.left = star.x + 'px';
+            element.style.top = star.y + 'px';
+            
+            const content = document.createElement('div');
+            content.className = 'element-content group';
+            
+            const main = document.createElement('div');
+            main.className = 'element-main pulsing';
+            main.textContent = starColors[star.color];
+            main.onmousedown = (e) => handleMouseDown(e, 'star', star.id);
+            main.onclick = (e) => { e.stopPropagation(); startEditing(star.id); };
+            
+            const buttons = document.createElement('div');
+            buttons.className = 'element-buttons';
+            
+            const colorBtn = document.createElement('button');
+            colorBtn.className = 'element-btn color-btn';
+            colorBtn.innerHTML = '🎨';
+            colorBtn.onclick = (e) => { e.stopPropagation(); changeColor('star', star.id); };
+            
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'element-btn delete-btn';
+            deleteBtn.innerHTML = '×';
+            deleteBtn.onclick = (e) => { e.stopPropagation(); deleteItem('star', star.id); };
+            
+            buttons.appendChild(colorBtn);
+            buttons.appendChild(deleteBtn);
+            
+            content.appendChild(main);
+            content.appendChild(buttons);
+            
+            if (editingItem === star.id) {
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.value = star.label;
+                input.className = 'label-input star-input';
+                input.onblur = (e) => updateLabel('star', star.id, e.target.value);
+                input.onkeypress = (e) => {
+                    if (e.key === 'Enter') updateLabel('star', star.id, e.target.value);
+                };
+                content.appendChild(input);
+                setTimeout(() => input.focus(), 0);
+            } else {
+                const label = document.createElement('div');
+                label.className = 'label-display star-label';
+                label.textContent = star.label;
+                content.appendChild(label);
+            }
+            
+            element.appendChild(content);
+            return element;
+        }
+
+        function startEditing(id) {
+            editingItem = id;
+            renderElements();
+            updateSectionZIndex();
+        }
+
+        function updateLabel(type, id, newLabel) {
+            const currentPage = pages[currentPageId];
+            if (type === 'fish') {
+                const fish = currentPage.fish.find(f => f.id === id);
+                if (fish) fish.label = newLabel;
+            } else if (type === 'bubble') {
+                const bubble = currentPage.bubbles.find(b => b.id === id);
+                if (bubble) bubble.label = newLabel;
+            } else if (type === 'star') {
+                const star = currentPage.stars.find(s => s.id === id);
+                if (star) star.label = newLabel;
+            }
+            editingItem = null;
+            renderElements();
+            updateSectionZIndex();
+            updateWordTracker();
+        }
+
+        function deleteItem(type, id) {
+            const currentPage = pages[currentPageId];
+            if (type === 'fish') {
+                currentPage.fish = currentPage.fish.filter(f => f.id !== id);
+            } else if (type === 'bubble') {
+                currentPage.bubbles = currentPage.bubbles.filter(b => b.id !== id);
+            } else if (type === 'star') {
+                currentPage.stars = currentPage.stars.filter(s => s.id !== id);
+            }
+            renderElements();
+            updateWordTracker();
+        }
+
+        function changeColor(type, id) {
+            const currentPage = pages[currentPageId];
+            if (type === 'fish') {
+                const fish = currentPage.fish.find(f => f.id === id);
+                if (fish) fish.color = (fish.color + 1) % fishColors.length;
+            } else if (type === 'bubble') {
+                const bubble = currentPage.bubbles.find(b => b.id === id);
+                if (bubble) bubble.color = (bubble.color + 1) % bubbleColors.length;
+            } else if (type === 'star') {
+                const star = currentPage.stars.find(s => s.id === id);
+                if (star) star.color = (star.color + 1) % starColors.length;
+            }
+            renderElements();
+        }
+
+        function handleMouseDown(e, type, id) {
+            e.stopPropagation();
+            const elementRect = e.currentTarget.getBoundingClientRect();
+            const elementCenterX = elementRect.left + elementRect.width / 2;
+            const elementCenterY = elementRect.top + elementRect.height / 2;
+            
+            dragging = { type, id };
+            dragOffset = {
+                x: e.clientX - elementCenterX,
+                y: e.clientY - elementCenterY
+            };
+        }
+
+        function handleMouseMove(e) {
+            if (!dragging) return;
+            
+            let sectionRect;
+            if (dragging.type === 'fish') {
+                sectionRect = document.getElementById('oceanSection').getBoundingClientRect();
+            } else if (dragging.type === 'bubble') {
+                sectionRect = document.getElementById('surfaceSection').getBoundingClientRect();
+            } else if (dragging.type === 'star') {
+                sectionRect = document.getElementById('skySection').getBoundingClientRect();
+            }
+            
+            const newX = e.clientX - sectionRect.left - dragOffset.x;
+            const newY = e.clientY - sectionRect.top - dragOffset.y;
+            
+            const currentPage = pages[currentPageId];
+            if (dragging.type === 'fish') {
+                const fish = currentPage.fish.find(f => f.id === dragging.id);
+                if (fish) {
+                    fish.x = newX;
+                    fish.y = newY;
+                }
+            } else if (dragging.type === 'bubble') {
+                const bubble = currentPage.bubbles.find(b => b.id === dragging.id);
+                if (bubble) {
+                    bubble.x = newX;
+                    bubble.y = newY;
+                }
+            } else if (dragging.type === 'star') {
+                const star = currentPage.stars.find(s => s.id === dragging.id);
+                if (star) {
+                    star.x = newX;
+                    star.y = newY;
+                }
+            }
+            
+            renderElements();
+        }
+
+        function handleMouseUp() {
+            dragging = null;
+            dragOffset = { x: 0, y: 0 };
+        }
+
+        function updateSectionZIndex() {
+            const currentPage = pages[currentPageId];
+            const oceanSection = document.getElementById('oceanSection');
+            const surfaceSection = document.getElementById('surfaceSection');
+            const skySection = document.getElementById('skySection');
+            
+            // Reset z-index
+            oceanSection.style.zIndex = '10';
+            surfaceSection.style.zIndex = '20';
+            skySection.style.zIndex = '30';
+            
+            // Set higher z-index for section being edited
+            if (editingItem && currentPage.fish.some(f => f.id === editingItem)) {
+                oceanSection.style.zIndex = '50';
+            } else if (editingItem && currentPage.bubbles.some(b => b.id === editingItem)) {
+                surfaceSection.style.zIndex = '50';
+            } else if (editingItem && currentPage.stars.some(s => s.id === editingItem)) {
+                skySection.style.zIndex = '50';
+            }
+        }
+
+        function getAllLabels() {
+            const allLabels = [];
+            Object.values(pages).forEach(page => {
+                allLabels.push(...page.fish.map(f => f.label));
+                allLabels.push(...page.bubbles.map(b => b.label));
+                allLabels.push(...page.stars.map(s => s.label));
+            });
+            return allLabels.filter(label => label && label.trim() !== '');
+        }
+
+        function analyzeText() {
+            const labels = getAllLabels();
+            const allText = labels.join(' ').toLowerCase();
+            const words = allText.split(/\s+/).filter(word => word.length > 2);
+            
+            const wordCount = {};
+            const detectedNames = {};
+            
+            words.forEach(word => {
+                const cleanWord = word.replace(/[^\w]/g, '');
+                if (!cleanWord || stopWords.has(cleanWord)) return;
+                
+                wordCount[cleanWord] = (wordCount[cleanWord] || 0) + 1;
+                
+                if (commonNames.has(cleanWord) || /^[A-Z]/.test(word)) {
+                    detectedNames[cleanWord] = (detectedNames[cleanWord] || 0) + 1;
+                }
+            });
+            
+            return { wordCount, detectedNames };
+        }
+
+        function updateWordTracker() {
+            const { wordCount, detectedNames } = analyzeText();
+            
+            const namesSection = document.getElementById('namesSection');
+            const namesList = document.getElementById('namesList');
+            const wordsSection = document.getElementById('wordsSection');
+            const wordsList = document.getElementById('wordsList');
+            const noData = document.getElementById('noData');
+            
+            // Update names
+            if (Object.keys(detectedNames).length > 0) {
+                namesSection.style.display = 'block';
+                namesList.innerHTML = '';
+                Object.entries(detectedNames)
+                    .sort(([,a], [,b]) => b - a)
+                    .forEach(([name, count]) => {
+                        const item = document.createElement('div');
+                        item.className = 'word-item';
+                        item.innerHTML = `<span class="capitalize">${name}</span><span class="word-count">${count}</span>`;
+                        namesList.appendChild(item);
+                    });
+            } else {
+                namesSection.style.display = 'none';
+            }
+            
+            // Update words
+            const filteredWords = Object.entries(wordCount)
+                .filter(([word]) => !detectedNames[word])
+                .sort(([,a], [,b]) => b - a)
+                .slice(0, 15);
+                
+            if (filteredWords.length > 0) {
+                wordsSection.style.display = 'block';
+                wordsList.innerHTML = '';
+                filteredWords.forEach(([word, count]) => {
+                    const item = document.createElement('div');
+                    item.className = 'word-item';
+                    item.innerHTML = `<span>${word}</span><span class="word-count">${count}</span>`;
+                    wordsList.appendChild(item);
+                });
+            } else {
+                wordsSection.style.display = 'none';
+            }
+            
+            // Show/hide no data message
+            noData.style.display = (Object.keys(wordCount).length === 0) ? 'block' : 'none';
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const showBtn = document.getElementById('showTrackerBtn');
+            
+            if (showTracker) {
+                sidebar.style.display = 'none';
+                showBtn.style.display = 'block';
+                showTracker = false;
+            } else {
+                sidebar.style.display = 'block';
+                showBtn.style.display = 'none';
+                showTracker = true;
+            }
+        }
+
+        // Initialize on page load
+        window.onload = init;
+    </script>
+</body>
+</html>
